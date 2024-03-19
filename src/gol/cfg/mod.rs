@@ -1,23 +1,23 @@
-use crate::lattice::{tetra::Tetragonal2, var::LatticeVariant};
-
 // Configuration for Game Mech
+#[derive(Clone, Copy)]
 pub struct GolCfg {
-    // width of the game
-    width: usize,
-
-    // height of the game
-    height: usize,
-
-    // lattice of the game
-    lattice: LatticeVariant,
+    // Width of the board
+    pub width: usize,
+    // Height of the board
+    pub height: usize,
+    // Length of the board, for 2d board, length will always be 1.
+    pub length: usize,
+    // Lattice used in the board.
+    pub lattice: &'static str,
 }
 
 impl Default for GolCfg {
     fn default() -> Self {
         Self {
-            width: 10,
-            height: 10,
-            lattice: LatticeVariant::Tetra2(Tetragonal2::new()),
+            width: 4,
+            height: 4,
+            length: 4,
+            lattice: "Tetra2",
         }
     }
 }
