@@ -39,6 +39,15 @@ impl GameOfLife {
     }
 }
 
+impl Default for GameOfLife {
+    fn default() -> Self {
+        let cfg: GolCfg = Default::default();
+        let rule: GolRule = Default::default();
+        let board = GameOfLife::init_board(&cfg);
+        Self { rule, cfg, board }
+    }
+}
+
 impl Debug for GameOfLife {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.debug_struct("GameOfLife")

@@ -1,8 +1,8 @@
-mod app;
-mod countable;
-mod gol;
-mod lattice;
-mod types;
+pub mod app;
+pub mod countable;
+pub mod gol;
+pub mod lattice;
+pub mod types;
 
 fn main() {
     app::main();

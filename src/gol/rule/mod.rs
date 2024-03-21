@@ -15,8 +15,8 @@ impl Default for GolRule {
     fn default() -> Self {
         Self {
             tiered_adj_factors: vec![1., 1., 1.],
-            alive_threshold: (0.25, 0.5),
-            dead_threshold: (0.375, 0.5),
+            alive_threshold: (0.20, 0.4),
+            dead_threshold: (0.35, 0.4),
         }
     }
 }

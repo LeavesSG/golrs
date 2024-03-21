@@ -14,8 +14,8 @@ pub struct GolCfg {
 impl Default for GolCfg {
     fn default() -> Self {
         Self {
-            width: 4,
-            height: 4,
+            width: 40,
+            height: 40,
             length: 4,
             lattice: "Tetra2",
         }

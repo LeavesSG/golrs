@@ -1,3 +1,5 @@
+use rand::random;
+
 use crate::gol::rule::GolRule;
 
 #[derive(Debug, PartialEq, Eq, Clone, Hash)]
@@ -8,6 +10,12 @@ pub(crate) struct Snapshot {
 impl Snapshot {
     pub fn new(buf: Vec<bool>) -> Self {
         Snapshot { buf }
+    }
+
+    pub fn random(len: usize) -> Self {
+        let mut buf = vec![];
+        (0..len).for_each(|_| buf.push(random::<f32>() > 0.5));
+        Self::new(buf)
     }
 
     pub fn consume(self) -> Vec<bool> {
@@ -29,14 +37,18 @@ impl Snapshot {
     }
 }
 
-pub trait ToSnapshot {
+pub trait BufSize {
+    fn buf_size(&self) -> usize;
+}
+
+pub trait ToSnapshot: BufSize {
     fn to_snapshot(&self) -> Snapshot;
 }
 
-pub trait ConsumeSnapshot {
+pub trait ConsumeSnapshot: BufSize {
     fn consume_snapshot(&mut self, snapshot: Snapshot);
 }
 
-pub trait NextSnapshot {
+pub trait NextSnapshot: BufSize {
     fn next_snapshot(&self, rule: &GolRule) -> Snapshot;
 }

@@ -3,9 +3,12 @@ use bevy::{
     sprite::{MaterialMesh2dBundle, Mesh2dHandle},
 };
 
-use crate::gol::game::GameOfLife;
+use crate::gol::{game::GameOfLife, mech::snapshot::Snapshot};
 
-const X_EXTENT: f32 = 600.;
+const ALIVE_COLOR: [f32; 3] = [0., 0., 0.];
+const DEAD_COLOR: [f32; 3] = [1., 1., 1.];
+const CELL_WIDTH: f32 = 10.;
+const CELL_HEIGHT: f32 = 10.;
 
 unsafe impl Sync for GameOfLife {}
 unsafe impl Send for GameOfLife {}
@@ -16,49 +19,52 @@ pub fn setup(
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<ColorMaterial>>,
 ) {
-    // let game = GameOfLife::default();
-    // commands.insert_resource(game);
+    let mut game = GameOfLife::default();
+    let width = game.cfg.width as f32;
+    let height = game.cfg.height as f32;
+    let xt = width * CELL_WIDTH;
+    let yt = height * CELL_HEIGHT;
 
     commands.spawn(Camera2dBundle::default());
 
-    // let shapes = [
-    //     Mesh2dHandle(meshes.add(Circle { radius: 50.0 })),
-    //     Mesh2dHandle(meshes.add(Ellipse::new(25.0, 50.0))),
-    //     Mesh2dHandle(meshes.add(Capsule2d::new(25.0, 50.0))),
-    //     Mesh2dHandle(meshes.add(Rectangle::new(50.0, 100.0))),
-    //     Mesh2dHandle(meshes.add(RegularPolygon::new(50.0, 6))),
-    //     Mesh2dHandle(meshes.add(Triangle2d::new(
-    //         Vec2::Y * 50.0,
-    //         Vec2::new(-50.0, -50.0),
-    //         Vec2::new(50.0, -50.0),
-    //     ))),
-    // ];
-    // let num_shapes = shapes.len();
+    let size = game.board.buf_size();
+    let snapshot = Snapshot::random(size);
+    for (index, item) in snapshot.buf.iter().enumerate() {
+        // Distribute colors evenly across the rainbow.
+        let color = Color::rgb_from_array(if *item { ALIVE_COLOR } else { DEAD_COLOR });
+        let reflection = game.board.decount_vec(index);
+        let i = reflection[0];
+        let j = reflection[1];
+        let bundle = MaterialMesh2dBundle {
+            mesh: Mesh2dHandle(meshes.add(Rectangle::new(CELL_WIDTH, CELL_HEIGHT))),
+            material: materials.add(color),
+            transform: Transform::from_xyz(
+                // Distribute shapes from -X_EXTENT to +X_EXTENT.
+                -xt / 2. + i as f32 / (width - 1.) * xt,
+                -yt / 2. + j as f32 / (height - 1.) * yt,
+                0.0,
+            ),
+            ..default()
+        };
+        commands.spawn(bundle);
+    }
+    game.board.consume_snapshot(snapshot);
 
-    // for (i, shape) in shapes.into_iter().enumerate() {
-    //     // Distribute colors evenly across the rainbow.
-    //     let color = Color::hsl(360. * i as f32 / num_shapes as f32, 0.95, 0.7);
-
-    //     commands.spawn(MaterialMesh2dBundle {
-    //         mesh: shape,
-    //         material: materials.add(color),
-    //         transform: Transform::from_xyz(
-    //             // Distribute shapes from -X_EXTENT to +X_EXTENT.
-    //             -X_EXTENT / 2. + i as f32 / (num_shapes - 1) as f32 * X_EXTENT,
-    //             0.0,
-    //             0.0,
-    //         ),
-    //         ..default()
-    //     });
-    // }
+    commands.insert_resource(game);
 }
 
 pub fn update(
-    mut commands: Commands,
+    mat_handles: Query<&Handle<ColorMaterial>>,
     mut game: ResMut<GameOfLife>,
-    mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<ColorMaterial>>,
 ) {
-    // let x = board.x;
-    let snapshot = game.board.to_snapshot();
+    let snapshot = game.board.next_snapshot(&game.rule);
+    for (i, handle) in mat_handles.iter().enumerate() {
+        if let Some(material) = materials.get_mut(handle) {
+            let alive = snapshot.buf[i];
+            let color = Color::rgb_from_array(if alive { ALIVE_COLOR } else { DEAD_COLOR });
+            material.color = color;
+        }
+    }
+    game.board.consume_snapshot(snapshot);
 }

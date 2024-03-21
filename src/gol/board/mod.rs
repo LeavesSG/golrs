@@ -1,7 +1,7 @@
 use std::{fmt::Debug, ops::Index, usize};
 
 use crate::{
-    countable::Countable,
+    countable::{Countable, CountableVec},
     lattice::{adjacent::*, def::BLattice, fold::Fold},
     types::{Vec2i, Vec2u, Vec3i, Vec3u, VecN},
 };
@@ -96,6 +96,19 @@ impl<const D: usize> Countable for Board<D> {
     }
 }
 
+impl<const D: usize> CountableVec for Board<D> {
+    fn count_vec(&self, item: Vec<isize>) -> usize {
+        let mut arr = self.decount(0);
+        let len = arr.len();
+        arr.copy_from_slice(&item[..len]);
+        self.count(arr)
+    }
+
+    fn decount_vec(&self, index: usize) -> Vec<isize> {
+        self.decount(index).into()
+    }
+}
+
 impl<T, I> CellAlive for T
 where
     T: Index<usize, Output = bool> + Countable<Item = I>,
@@ -162,6 +175,12 @@ where
     }
 }
 
+impl<const D: usize> BufSize for Board<D> {
+    fn buf_size(&self) -> usize {
+        self.size.iter().product()
+    }
+}
+
 impl<const D: usize> ToSnapshot for Board<D> {
     fn to_snapshot(&self) -> Snapshot {
         Snapshot::new(self.buf.clone())
@@ -198,6 +217,7 @@ impl<T, I> GameMech for T where
         + Countable<Item = I>
         + ConsumeSnapshot
         + ToSnapshot
+        + CountableVec
 {
 }
 

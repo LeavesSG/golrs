@@ -2,14 +2,12 @@
 
 mod sys;
 
-use bevy::{
-    prelude::*,
-    sprite::{MaterialMesh2dBundle, Mesh2dHandle},
-};
+use bevy::prelude::*;
 
 pub fn main() {
     App::new()
         .add_plugins(DefaultPlugins)
         .add_systems(Startup, sys::setup)
+        .add_systems(Update, sys::update)
         .run();
 }
