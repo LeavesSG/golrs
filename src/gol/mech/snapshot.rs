@@ -3,7 +3,7 @@ use rand::random;
 use crate::gol::rule::GolRule;
 
 #[derive(Debug, PartialEq, Eq, Clone, Hash)]
-pub(crate) struct Snapshot {
+pub struct Snapshot {
     pub buf: Vec<bool>,
 }
 
@@ -34,6 +34,19 @@ impl Snapshot {
             snapshot.append_from_u8(num);
         }
         snapshot
+    }
+
+    pub fn from_str(str: String, symbols: (char, char)) -> Self {
+        let (alive, dead) = symbols;
+        let mut buf = vec![];
+        str.chars().for_each(|char| {
+            if char == alive {
+                buf.push(true)
+            } else if char == dead {
+                buf.push(false)
+            }
+        });
+        Self::new(buf)
     }
 }
 

@@ -147,6 +147,7 @@ where
 {
     fn will_alive(&self, item: Self::Item, rule: &GolRule) -> bool {
         let tiered_adj = self.tiered_adj(item);
+        let tier = tiered_adj.len();
         let alive_rates = tiered_adj.into_iter().map(|adj| {
             let valid = adj.iter().filter_map(|&item| self.fold(item));
             let mut count = 0.;
@@ -158,7 +159,7 @@ where
                 .count() as f64;
             alive / count
         });
-        let normalized_factors = rule.normalized_tier_factors();
+        let normalized_factors = rule.normalized_tier_factors(tier);
         let calc_rate: f64 = alive_rates.enumerate().fold(0., |acc, (index, rate)| {
             let factor = if index < normalized_factors.len() {
                 normalized_factors[index]
@@ -226,7 +227,17 @@ fn test() {
     let rule = GolRule::default();
     let tetra3 = crate::lattice::variant::Lat2::default().lat2();
     let mut board = Board::<2>::new([4, 4], Box::new(tetra3));
-    let snapshot = Snapshot::from_u8(vec![0b11001100, 0b00000000]);
+    let snapshot = Snapshot::from_str(
+        String::from(
+            "
+        0000
+        0100
+        0100
+        0000",
+        ),
+        ('1', '0'),
+    );
     board.consume_snapshot(snapshot.clone());
-    println!("{:?}", board.next_snapshot(&rule) == snapshot)
+    let res = board.will_alive([1, 1], &rule);
+    println!("{}", res);
 }

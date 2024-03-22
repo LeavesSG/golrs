@@ -30,7 +30,6 @@ pub fn setup(
     let size = game.board.buf_size();
     let snapshot = Snapshot::random(size);
     for (index, item) in snapshot.buf.iter().enumerate() {
-        // Distribute colors evenly across the rainbow.
         let color = Color::rgb_from_array(if *item { ALIVE_COLOR } else { DEAD_COLOR });
         let reflection = game.board.decount_vec(index);
         let i = reflection[0];
@@ -39,7 +38,6 @@ pub fn setup(
             mesh: Mesh2dHandle(meshes.add(Rectangle::new(CELL_WIDTH, CELL_HEIGHT))),
             material: materials.add(color),
             transform: Transform::from_xyz(
-                // Distribute shapes from -X_EXTENT to +X_EXTENT.
                 -xt / 2. + i as f32 / (width - 1.) * xt,
                 -yt / 2. + j as f32 / (height - 1.) * yt,
                 0.0,

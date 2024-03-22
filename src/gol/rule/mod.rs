@@ -14,7 +14,7 @@ pub struct GolRule {
 impl Default for GolRule {
     fn default() -> Self {
         Self {
-            tiered_adj_factors: vec![1., 1., 1.],
+            tiered_adj_factors: vec![1.0, 1.0, 1.0],
             alive_threshold: (0.20, 0.4),
             dead_threshold: (0.35, 0.4),
         }
@@ -22,8 +22,9 @@ impl Default for GolRule {
 }
 
 impl GolRule {
-    pub fn normalized_tier_factors(&self) -> Vec<f64> {
-        let sum: f64 = self.tiered_adj_factors.iter().sum();
-        self.tiered_adj_factors.iter().map(|f| f / sum).collect()
+    pub fn normalized_tier_factors(&self, tier: usize) -> Vec<f64> {
+        let using_tier = &self.tiered_adj_factors[0..tier];
+        let sum: f64 = using_tier.iter().sum();
+        using_tier.iter().map(|f| f / sum).collect()
     }
 }
